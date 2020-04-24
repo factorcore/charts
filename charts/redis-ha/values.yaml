@@ -21,6 +21,10 @@ replicas: 3
 
 ## Custom labels for the redis pod
 labels: {}
+secretMounts: []
+#  - name: redis-certificates
+#    secretName: redis-certificates
+#    path: /usr/share/redis/config/certs
 
 ## Pods Service Account
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/

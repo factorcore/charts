@@ -187,6 +187,13 @@ spec:
         volumeMounts:
         - mountPath: /data
           name: data
+          {{- range .Values.secretMounts }}
+          - name: {{ .name }}
+            mountPath: {{ .path }}
+            {{- if .subPath }}
+            subPath: {{ .subPath }}
+            {{- end }}
+          {{- end }}
       - name: sentinel
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -194,7 +201,7 @@ spec:
           - redis-sentinel
         args:
           - /data/conf/sentinel.conf
-{{- if .Values.auth }}
+        {{- if .Values.auth }}
         env:
         - name: AUTH
           valueFrom:
@@ -205,13 +212,13 @@ spec:
               name: {{ template "redis-ha.fullname" . }}
             {{- end }}
               key: {{ .Values.authKey }}
-{{- end }}
+        {{- end }}
         livenessProbe:
           tcpSocket:
             port: {{ .Values.sentinel.port }}
           initialDelaySeconds: 15
         resources:
-{{ toYaml .Values.sentinel.resources | indent 10 }}
+        {{ toYaml .Values.sentinel.resources | indent 10 }}
         ports:
           - name: sentinel
             containerPort: {{ .Values.sentinel.port }}
@@ -282,6 +289,11 @@ spec:
             - key: script
               path: script.lua
       {{- end }}
+      {{- range .Values.secretMounts }}
+        - name: {{ .name }}
+          secret:
+            secretName: {{ .secretName }}
+        {{- end }}
 {{- if .Values.persistentVolume.enabled }}
   volumeClaimTemplates:
   - metadata:
